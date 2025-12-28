@@ -393,11 +393,14 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		const isGroupAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
 		// normalize bot id and group admin ids to canonical form for comparison
 		const normalizedBot = (botNumber && typeof botNumber === 'string') ? (botNumber.includes(':') ? botNumber.split(':')[0] + '@s.whatsapp.net' : (botNumber.includes('@') ? botNumber : botNumber + '@s.whatsapp.net')) : botNumber;
-		const isBotAdmins = m.isGroup ? groupAdmins.includes(normalizedBot) : false
+		// Check bot admin by comparing normalized phone numbers
+		const botPhoneOnly = botNumber ? botNumber.replace(/[^0-9]/g, '') : '';
+		const isBotAdmins = m.isGroup ? groupAdmins.some(admin => admin.replace(/[^0-9]/g, '') === botPhoneOnly) : false
 		// debug logs to help diagnose admin detection issues
 		if (process.env.DEBUG_BOT_ADMIN === '1') {
 			console.log('DEBUG BOT ADMIN: botNumberRaw=', botNumberRaw);
 			console.log('DEBUG BOT ADMIN: botNumber=', botNumber);
+			console.log('DEBUG BOT ADMIN: botPhoneOnly=', botPhoneOnly);
 			console.log('DEBUG BOT ADMIN: normalizedBot=', normalizedBot);
 			console.log('DEBUG BOT ADMIN: groupAdmins=', JSON.stringify(groupAdmins));
 			console.log('DEBUG BOT ADMIN: isBotAdmins=', isBotAdmins);
@@ -4022,7 +4025,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'jadibot': {
-				if (!isPremium && !isCreator) return newReply(mess.owner);
+				if (!isPremium && !isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (isBot) return;
 				await m.react('✅');
 				try {
@@ -4035,7 +4038,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break
 
 			case 'stopjadibot': {
-				if (!isPremium && !isCreator) return newReply(mess.owner);
+				if (!isPremium && !isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (isBot) return;
 				await m.react('✅');
 				try {
@@ -4048,7 +4051,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break
 
 			case 'listjadibot': {
-				if (!isPremium && !isCreator) return newReply(mess.owner);
+				if (!isPremium && !isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (isBot) return;
 				await m.react('✅');
 				try {
@@ -5924,7 +5927,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'nsfw': {
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (args[0] === 'on') {
 					if (AntiNsfw) return newReply('Fitur NSFW sudah aktif sebelumnya!');
@@ -5995,7 +5998,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 				let settingKey = settings[command];
 				if (!settingKey) return;
 				if (!m.isGroup && command !== 'autoaipc') return newReply("❗ Maaf, perintah ini hanya bisa digunakan di grup!");
-				if (m.isGroup && !isBotAdmins && command !== 'autoaipc') return newReply("❗ Aku harus jadi admin dulu untuk menjalankan perintah ini!");
+				if (m.isGroup && !isBotAdmins && !isSuperAdmin && command !== 'autoaipc') return newReply("❗ Aku harus jadi admin dulu untuk menjalankan perintah ini!");
 				if (m.isGroup && !isAdmins && !isCreator && command !== 'autoaipc') return newReply("❗ Hanya admin yang bisa mengatur fitur ini!");
 				if (command === 'autoaipc' && !isCreator) return newReply("❗ Hanya pemilik bot yang bisa mengaktifkan atau menonaktifkan fitur ini!");
 				if (args.length < 1) return newReply(`⚠️ *Format salah!*\nGunakan perintah:\n${prefix + command} true/false`);
@@ -6108,7 +6111,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'kick': {
 				if (!m.isGroup) return newReply('Eits, perintah ini cuma bisa dipakai di grup lho, kak! 🤭');
 				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply('Maaf ya kak, cuma admin atau owner yang bisa pakai perintah ini. 🙏');
-				if (!isBotAdmins) return newReply('Aku belum jadi admin nih, kak. Jadikan aku admin dulu ya biar bisa bantu! 😢');
+				if (!isBotAdmins && !isSuperAdmin) return newReply('Aku belum jadi admin nih, kak. Jadikan aku admin dulu ya biar bisa bantu! 😢');
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) {
 					return newReply('Hmm... Kamu mau kick siapa nih? Sebutin dong orangnya! 🤔');
 				}
@@ -6186,7 +6189,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'add': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (!text && !m.quoted) {
 					newReply(`Cara pakai command: ${prefix + command} 62xxx`);
 				} else {
@@ -6226,7 +6229,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'pm': {
 				if (!m.isGroup) return newReply(mess.group)
 				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin)
-				if (!isBotAdmins) return newReply(mess.botAdmin)
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin)
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) return newReply('Hmm... Kamu mau promote siapa?');
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
 				if (!m.mentionedJid[0] && !m.quoted && !text) return newReply(`Hmm... Kamu mau ${command} siapa? 🤔`)
@@ -6238,7 +6241,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'dm': {
 				if (!m.isGroup) return newReply(mess.group)
 				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin)
-				if (!isBotAdmins) return newReply(mess.botAdmin)
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin)
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) return newReply('Hmm... Kamu Kamu demote siapa? 🤔')
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
 				if (!m.mentionedJid[0] && !m.quoted && !text) return newReply(`Hmm... Kamu mau ${command} siapa? 🤔`)
@@ -6249,7 +6252,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'revoke':{
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isCreator && !isSuperAdmin) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				await sock.groupRevokeInvite(m.chat)
 					.then(res => {
 						newReply(mess.done)
@@ -6261,7 +6264,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'setsubject':
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (!text) return newReply('Mau di namain apa kak grupnya? 🤔');
 				await sock.groupUpdateSubject(m.chat, text);
 				newReply(mess.done);
@@ -6272,7 +6275,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'setppgc': {
 				if (!m.isGroup) return newReply(mess.group)
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin)
-				if (!isBotAdmins) return newReply(mess.botAdmin)
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin)
 				if (!quoted) return newReply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
 				if (!/image/.test(mime)) return newReply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
 				if (/webp/.test(mime)) return newReply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
@@ -6288,7 +6291,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'delppgroup': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				await sock.removeProfilePicture(m.chat)
 			}
 			break;
@@ -6350,7 +6353,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'setdesk':
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (!text) return newReply('Text ?')
 				await sock.groupUpdateDescription(m.chat, text)
 				newReply(mess.done)
@@ -6729,7 +6732,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'grup': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (args[0] === 'close') {
 					await sock.groupSettingUpdate(m.chat, 'announcement')
 						.then(() => newReply('✅ Grup berhasil ditutup, hanya admin yang bisa mengirim pesan sekarang! 🔒'))
@@ -6837,7 +6840,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'editinfo': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (args[0] === 'open') {
 					await sock.groupSettingUpdate(m.chat, 'unlocked')
 						.then(() => newReply('✅ Anggota sekarang bisa mengedit info grup! 📛✨'))
@@ -7924,7 +7927,7 @@ break;
 			case 'tagall': {
 				if (!m.isGroup) return newReply(`Fitur ini hanya bisa digunakan di grup ya, kak!`)
 				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(`Maaf, kak! Kamu harus jadi admin dulu buat pakai fitur ini.`)
-				if (!isBotAdmins) return newReply(`Aku harus jadi admin dulu untuk menjalankan perintah ini. Tolong jadikan aku admin ya!`)
+				if (!isBotAdmins && !isSuperAdmin) return newReply(`Aku harus jadi admin dulu untuk menjalankan perintah ini. Tolong jadikan aku admin ya!`)
 				let pengirim = m.sender
 				let teks = `🌸 *Tag All Anggota Grup* 🌸\n\n`
 				teks += `📣 *Penanda:* @${pengirim.split('@')[0]}\n`
@@ -10558,7 +10561,7 @@ break;
 
 			case 'getjoinrequest':{
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isBotAdmins) return newReply(mess.botAdmin);
+				if (!isBotAdmins && !isSuperAdmin) return newReply(mess.botAdmin);
 				if (!isAdmins && !isCreator && !isSuperAdmin) return newReply(mess.admin);
 				const data = await sock.groupRequestParticipantsList(m.chat);
 				if (!data || !data.length) {
