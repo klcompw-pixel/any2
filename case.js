@@ -347,10 +347,10 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			now,
 			fromMe
 		} = m
-		const body = m.body
-		const budy = m.text
+		const body = m.body || ''
+		const budy = m.text || ''
 		const prefix = /^[°•π÷×¶∆£¢€¥®™✓_=|~!?#$%^&.+-,\/\\©^]/.test(body) ? body.match(/^[°•π÷×¶∆£¢€¥®™✓_=|~!?#$%^&.+-,\/\\©^]/gi) : prefa
-		const isCmd = body.startsWith(prefix)
+		const isCmd = body && body.startsWith(prefix)
 		const isCommand = isCmd ? body.slice(1).trim().split(' ').shift().toLowerCase() : ""
 		command = isCmd ? body.slice(1).trim().split(' ').shift().toLowerCase() : ''
 		const args = body.trim().split(/ +/).slice(1);
@@ -385,9 +385,9 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		const isQuotedDocument = type === 'extendedTextMessage' && content.includes('documentMessage');
 
 		const isGroup = m.key.remoteJid.endsWith('@g.us');
-		const groupMetadata = m.isGroup ? await sock.groupMetadata(m.chat).catch(e => {}) : ''
-		const groupName = m.isGroup ? groupMetadata.subject : ''
-		const participants = m.isGroup ? groupMetadata.participants : []
+		const groupMetadata = m.isGroup ? await sock.groupMetadata(m.chat).catch(e => null) : null
+		const groupName = m.isGroup && groupMetadata ? groupMetadata.subject : ''
+		const participants = m.isGroup && groupMetadata ? groupMetadata.participants : []
 		const groupAdminsRaw = m.isGroup ? getGroupAdmins(participants) : []
 		const groupAdmins = Array.isArray(groupAdminsRaw) ? groupAdminsRaw.map(j => (typeof j === 'string' ? (j.includes(':') ? j.split(':')[0] + '@s.whatsapp.net' : j) : j)) : []
 		const isGroupAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
@@ -404,7 +404,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		}
 		const isAdmins = isGroupAdmins
 		const isBan = banned.includes(m.sender);
-		const groupOwner = m.isGroup ? groupMetadata.owner : ''
+		const groupOwner = m.isGroup && groupMetadata ? groupMetadata.owner : ''
 		const isGroupOwner = m.isGroup ? (groupOwner ? groupOwner : groupAdmins).includes(m.sender) : false
 		const AntiNsfw = m.isGroup ? ntnsfw.includes(m.chat) : false
 
