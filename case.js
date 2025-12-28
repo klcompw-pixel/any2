@@ -6870,29 +6870,54 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			}
 			break;
 
-			case 'brat':
-			case 'anomali': {
-				if (!isPremium && db.data.users[m.sender].limit < 1) return newReply(mess.limit);
-				if (!text) return newReply(`Contoh : ${prefix + command} Hai kak`)
-				if (text.length > 101) return newReply(`Karakter terbatas, max 100!`)
-				let caption = 'Yuk pilih tipe *brat* yang Kamu suka, ada beberapa tipe nih! Klik *tombol* di bawah ini ya, kak! 😋👇';
-				m.reply({
-					text: caption,
-					footer: footer,
-					buttons: [
-						{
-							buttonId: `${prefix}bratgambar ${text}`,
-							buttonText: { displayText: "Gambar" }
-						},
-						{
-							buttonId: `${prefix}bratvideo ${text}`,
-							buttonText: { displayText: "Video" }
-						}
-					],
-					viewOnce: true
-				});
-			}
-			break;
+case 'brat':
+case 'anomali': {
+    if (!isPremium && db.data.users[m.sender].limit < 1) return newReply(mess.limit);
+    if (!text) return newReply(`Contoh : ${prefix + command} Hai kak`);
+    if (text.length > 101) return newReply(`Karakter terbatas, max 100!`);
+    
+    let msg = generateWAMessageFromContent(m.chat, {
+        viewOnceMessage: {
+            message: {
+                messageContextInfo: {
+                    deviceListMetadata: {},
+                    deviceListMetadataVersion: 2
+                },
+                interactiveMessage: proto.Message.InteractiveMessage.create({
+                    body: proto.Message.InteractiveMessage.Body.create({
+                        text: 'Yuk pilih tipe *brat* yang Kamu suka, ada beberapa tipe nih! 😋👇'
+                    }),
+                    footer: proto.Message.InteractiveMessage.Footer.create({
+                        text: footer
+                    }),
+                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
+                        buttons: [
+                            {
+                                name: "quick_reply",
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: "📸 Gambar",
+                                    id: `${prefix}bratgambar ${text}`
+                                })
+                            },
+                            {
+                                name: "quick_reply",
+                                buttonParamsJson: JSON.stringify({
+                                    display_text: "🎥 Video",
+                                    id: `${prefix}bratvideo ${text}`
+                                })
+                            }
+                        ]
+                    })
+                })
+            }
+        }
+    }, { quoted: m });
+    
+    await sock.relayMessage(msg.key.remoteJid, msg.message, {
+        messageId: msg.key.id
+    });
+}
+break;
 
 			case 'bratgambar': {
 				if (!isPremium && db.data.users[m.sender].limit < 1) return newReply(mess.limit);
