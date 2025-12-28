@@ -7942,6 +7942,7 @@ break;
 			case 'hidetag': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				logCommand('hidetag', m.sender, '', 'SUCCESS');
 				if (m.quoted) {
 					sock.sendMessage(m.chat, {
 						forward: m.quoted.fakeObj,
