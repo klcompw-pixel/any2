@@ -13,14 +13,14 @@
 const fs = require('fs');
 const chalk = require('chalk');
 
-global.botName = 'ᴋᴀʏᴀɴᴀ - ᴍᴅ'; // Nama Bot Kamu
+global.botName = 'Goodbot1'; // Nama Bot Kamu
 global.ownerNumber = '6285858850541'; // Nomor Kamu
 global.ownerName = 'Felaa'; // Nama Kamu
 global.website = '-'; // Web Kamu
 global.wagc = 'https://whatsapp.com/channel/0029VbAi39lKmCPPAoKa8v15'; // Web Kamu
 
-global.packname = Goodbot; // Nama Pack
-global.author = Felas; // Nama Author
+global.packname = 'Goodbot'; // Nama Pack
+global.author = 'Felas'; // Nama Author
 global.footer = '© Felaa';
 global.creator = '6285858850541@s.whatsapp.net'; // Nomor Creator
 global.premium = ['6285858850541']; // User Premium
