@@ -358,7 +358,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		// Log command execution
 		if (isCmd) logCommand(command, m.sender, body);
 		const botNumberRaw = await sock.decodeJid(sock.user.id) || '';
-		const botNumber = botNumberRaw.includes(':') ? botNumberRaw.split(':')[0] + '@s.whatsapp.net' : botNumberRaw;
+		const botNumber = (botNumberRaw && typeof botNumberRaw === 'string') ? (botNumberRaw.includes(':') ? botNumberRaw.split(':')[0] + '@s.whatsapp.net' : botNumberRaw) : botNumberRaw;
 		const pushname = m.pushName || "No Name"
 		const text = q = args.join(" ");
 		const getQuoted = (m.quoted || m);
@@ -391,7 +391,9 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		const groupAdminsRaw = m.isGroup ? getGroupAdmins(participants) : []
 		const groupAdmins = Array.isArray(groupAdminsRaw) ? groupAdminsRaw.map(j => (typeof j === 'string' ? (j.includes(':') ? j.split(':')[0] + '@s.whatsapp.net' : j) : j)) : []
 		const isGroupAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
-		const isBotAdmins = m.isGroup ? groupAdmins.includes(botNumber) : false
+		// normalize bot id and group admin ids to canonical form for comparison
+		const normalizedBot = (botNumber && typeof botNumber === 'string') ? (botNumber.includes(':') ? botNumber.split(':')[0] + '@s.whatsapp.net' : (botNumber.includes('@') ? botNumber : botNumber + '@s.whatsapp.net')) : botNumber;
+		const isBotAdmins = m.isGroup ? groupAdmins.includes(normalizedBot) : false
 		const isAdmins = isGroupAdmins
 		const isBan = banned.includes(m.sender);
 		const groupOwner = m.isGroup ? groupMetadata.owner : ''
@@ -403,7 +405,12 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			m.admins = (m.metadata.participants.reduce((a, b) => (b.admin ? a.push({ id: b.id, admin: b.admin }) : [...a]) && a, []))
 			m.isAdmin = m.admins.some((b) => b.id === m.sender)
 			m.participant = m.key.participant
-			m.isBotAdmin = !!m.admins.find((member) => member.id === botNumber)
+			m.isBotAdmin = !!m.admins.find((member) => {
+				if (!member || !member.id) return false
+				let mid = member.id
+				if (typeof mid === 'string' && mid.includes(':')) mid = mid.split(':')[0] + '@s.whatsapp.net'
+				return mid === normalizedBot
+			})
 		}
 
 		const clientId = sock.user.id.split(':')[0];
