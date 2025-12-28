@@ -286,6 +286,13 @@ async function startHaruka() {
 
 	function clearTmpFolder() {
 		const tmpFolder = path.join(__dirname, "temp");
+		
+		// Buat folder temp jika belum ada
+		if (!fs.existsSync(tmpFolder)) {
+			fs.mkdirSync(tmpFolder, { recursive: true });
+			return;
+		}
+		
 		fs.readdir(tmpFolder, (err, files) => {
 			if (err) {
 				console.error(chalk.red("Gagal membaca folder 'temp':"), err);
@@ -930,6 +937,13 @@ async function startHaruka() {
 			mime: 'application/octet-stream',
 			ext: '.bin'
 		}
+		
+		// Ensure temp folder exists before saving
+		const tempDir = path.join(__dirname, 'temp');
+		if (!fs.existsSync(tempDir)) {
+			fs.mkdirSync(tempDir, { recursive: true });
+		}
+		
 		filename = path.join(__filename, '../temp/' + new Date * 1 + '.' + type.ext)
 		if (data && save) fs.promises.writeFile(filename, data)
 		return {
@@ -1099,6 +1113,13 @@ async function startHaruka() {
 			buffer = Buffer.concat([buffer, chunk])
 		}
 		let type = await FileType.fromBuffer(buffer)
+		
+		// Ensure temp folder exists
+		const tempDir = path.join(__dirname, 'temp');
+		if (!fs.existsSync(tempDir)) {
+			fs.mkdirSync(tempDir, { recursive: true });
+		}
+		
 		let trueFileName = attachExtension ? ('./temp/' + filename + '.' + type.ext) : './temp/' + filename
 		await fs.writeFileSync(trueFileName, buffer)
 		return trueFileName
