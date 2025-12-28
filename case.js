@@ -356,7 +356,8 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		
 		// Log command execution
 		if (isCmd) logCommand(command, m.sender, body);
-		const botNumber = await sock.decodeJid(sock.user.id);
+		const botNumberRaw = await sock.decodeJid(sock.user.id) || '';
+		const botNumber = botNumberRaw.includes(':') ? botNumberRaw.split(':')[0] + '@s.whatsapp.net' : botNumberRaw;
 		const pushname = m.pushName || "No Name"
 		const text = q = args.join(" ");
 		const getQuoted = (m.quoted || m);
@@ -385,11 +386,12 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 		const isGroup = m.key.remoteJid.endsWith('@g.us');
 		const groupMetadata = m.isGroup ? await sock.groupMetadata(m.chat).catch(e => {}) : ''
 		const groupName = m.isGroup ? groupMetadata.subject : ''
-		const participants = m.isGroup ? await groupMetadata.participants : ''
-		const groupAdmins = m.isGroup ? await getGroupAdmins(participants) : ''
+		const participants = m.isGroup ? groupMetadata.participants : []
+		const groupAdminsRaw = m.isGroup ? getGroupAdmins(participants) : []
+		const groupAdmins = Array.isArray(groupAdminsRaw) ? groupAdminsRaw.map(j => (typeof j === 'string' ? (j.includes(':') ? j.split(':')[0] + '@s.whatsapp.net' : j) : j)) : []
 		const isGroupAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
 		const isBotAdmins = m.isGroup ? groupAdmins.includes(botNumber) : false
-		const isAdmins = m.isGroup ? groupAdmins.includes(m.sender) : false
+		const isAdmins = isGroupAdmins
 		const isBan = banned.includes(m.sender);
 		const groupOwner = m.isGroup ? groupMetadata.owner : ''
 		const isGroupOwner = m.isGroup ? (groupOwner ? groupOwner : groupAdmins).includes(m.sender) : false
