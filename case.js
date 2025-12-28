@@ -1,20 +1,31 @@
-/**
-  ᴍᴀᴏᴄʜᴀɴ ᴍᴀɴᴜᴇʟ || ᴄʜᴀʏ ᴍᴅ
- 
- ᴊᴇɴɪs sᴄʀɪᴘᴛ : ᴍᴀᴏᴄʜᴀɴ ᴍᴀɴᴜᴇʟ || ᴄʜᴀʏ ᴍᴅ
- ᴠᴇʀsɪᴏɴ : 1.4 ᴜᴘᴅᴀᴛᴇ
- 
- ᴄʀᴇᴀᴛᴇᴅ ʙʏ : FALLZX ɪɴғɪɴɪᴛʏ
- ʙᴀsᴇ sᴄʀɪᴘᴛ  ᴏʀɪ :
- -  ʀɪᴢᴀʟ-ᴅᴇᴠ
- - ғᴀʟʟxᴅ ( ᴄʀᴇᴀᴛᴇᴅ ᴍᴀᴏᴄʜᴀɴ ᴍᴅ  ) 
- ᴄʀᴇᴅɪᴛ ᴊᴀɴɢᴀɴ ᴅɪʜᴀᴘᴜs
-**/
-console.clear();
-require('./lib/menu');
-const {
-	downloadContentFromMessage,
-	BufferJSON,
+				try {
+					let anu = await fetchJson('https://raw.githubusercontent.com/BochilTeam/database/master/games/tebakkata.json');
+					let dataArr = Array.isArray(anu) ? anu : (anu && typeof anu === 'object') ? Object.values(anu) : [];
+					if (!dataArr || dataArr.length === 0) {
+						console.log('Empty tebakkata database', anu);
+						return newReply('*Gagal memuat database permainan (kosong).* ☹️');
+					}
+					let result = pickRandom(dataArr);
+					if (!result || !result.jawaban) {
+						console.log('Invalid tebakkata result', result);
+						return newReply('*Data permainan tidak valid. Coba lagi nanti.* ☹️');
+					}
+					console.log("Jawaban: " + result.jawaban);
+					tebakkata[m.chat] = [
+						await sock.sendText(m.chat, `Silahkan Jawab Pertanyaan Berikut\n\n${result.soal}\nWaktu : ${(120000 / 1000).toFixed(2)} detik\n\n_Ketik .nyerah Untuk Menyerah..._\n_Ketik .bantuan Untuk Petunjuk..._`, m),
+						result,
+						250,
+						setTimeout(() => {
+							if (tebakkata[m.chat]) {
+								waktuHabis(result.jawaban);
+								delete tebakkata[m.chat];
+							}
+						}, 120000)
+					];
+				} catch (error) {
+					console.log(error);
+					newReply('*Gagal memuat database dari server*. ☹️');
+				};
 	WA_DEFAULT_EPHEMERAL,
 	generateWAMessageFromContent,
 	proto,
@@ -3338,25 +3349,32 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 				if (gamecek) return newReply('Masih ada sesi yang belum selesai!');
 				if (!isPremium && db.data.users[m.sender].limit < 1) return newReply(mess.limit);
 				try {
-					let anu = await fetchJson('https://www.sock.my.id/cdn/game/tebakaplikasi.json')
-					let result = await pickRandom(anu)
-					console.log("Jawaban: " + result.jawaban)
+					let anu = await fetchJson('https://www.sock.my.id/cdn/game/tebakaplikasi.json');
+					let dataArr = Array.isArray(anu) ? anu : (anu && typeof anu === 'object') ? Object.values(anu) : [];
+					if (!dataArr || dataArr.length === 0) {
+						console.log('Empty tebakaplikasi database', anu);
+						return newReply('*Gagal memuat database permainan (kosong).* ☹️');
+					}
+					let result = pickRandom(dataArr);
+					if (!result || !result.jawaban) {
+						console.log('Invalid tebakaplikasi result', result);
+						return newReply('*Data permainan tidak valid. Coba lagi nanti.* ☹️');
+					}
+					console.log("Jawaban: " + result.jawaban);
 					tebakaplikasi[m.chat] = [
 						await sock.sendMessage(m.chat, {
-							image: {
-								url: result.image
-							},
+							image: { url: result.image },
 							caption: `Gambar diatas adalah aplikasi?\n\nWaktu : ${(120000 / 1000).toFixed(2)} detik\n\n_Ketik .nyerah Untuk Menyerah..._\n_Ketik .bantuan Untuk Petunjuk..._`
-						}, {
-							quoted: m
-						}), result, 250,
+						}, { quoted: m }),
+						result,
+						250,
 						setTimeout(() => {
 							if (tebakaplikasi[m.chat]) {
-								waktuHabis(result.jawaban)
-								delete tebakaplikasi[m.chat]
+								waktuHabis(result.jawaban);
+								delete tebakaplikasi[m.chat];
 							}
 						}, 120000)
-					]
+					];
 				} catch (error) {
 					console.log(error);
 					newReply('*Gagal memuat database dari server*. ☹️');
@@ -3369,18 +3387,29 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 				if (gamecek) return newReply('Masih ada sesi yang belum selesai!');
 				if (!isPremium && db.data.users[m.sender].limit < 1) return newReply(mess.limit);
 				try {
-					let anu = await fetchJson('https://raw.githubusercontent.com/BochilTeam/database/master/games/tebakkata.json')
-					let result = await pickRandom(anu)
-					console.log("Jawaban: " + result.jawaban)
+					let anu = await fetchJson('https://raw.githubusercontent.com/BochilTeam/database/master/games/tebakkata.json');
+					let dataArr = Array.isArray(anu) ? anu : (anu && typeof anu === 'object') ? Object.values(anu) : [];
+					if (!dataArr || dataArr.length === 0) {
+						console.log('Empty tebakkata database', anu);
+						return newReply('*Gagal memuat database permainan (kosong).* ☹️');
+					}
+					let result = pickRandom(dataArr);
+					if (!result || !result.jawaban) {
+						console.log('Invalid tebakkata result', result);
+						return newReply('*Data permainan tidak valid. Coba lagi nanti.* ☹️');
+					}
+					console.log("Jawaban: " + result.jawaban);
 					tebakkata[m.chat] = [
-						await sock.sendText(m.chat, `Silahkan Jawab Pertanyaan Berikut\n\n${result.soal}\nWaktu : ${(120000 / 1000).toFixed(2)} detik\n\n_Ketik .nyerah Untuk Menyerah..._\n_Ketik .bantuan Untuk Petunjuk..._`, m), result, 250,
+						await sock.sendText(m.chat, `Silahkan Jawab Pertanyaan Berikut\n\n${result.soal}\nWaktu : ${(120000 / 1000).toFixed(2)} detik\n\n_Ketik .nyerah Untuk Menyerah..._\n_Ketik .bantuan Untuk Petunjuk..._`, m),
+						result,
+						250,
 						setTimeout(() => {
 							if (tebakkata[m.chat]) {
-								waktuHabis(result.jawaban)
-								delete tebakkata[m.chat]
+								waktuHabis(result.jawaban);
+								delete tebakkata[m.chat];
 							}
 						}, 120000)
-					]
+					];
 				} catch (error) {
 					console.log(error);
 					newReply('*Gagal memuat database dari server*. ☹️');
