@@ -6876,46 +6876,25 @@ case 'anomali': {
     if (!text) return newReply(`Contoh : ${prefix + command} Hai kak`);
     if (text.length > 101) return newReply(`Karakter terbatas, max 100!`);
     
-    let msg = generateWAMessageFromContent(m.chat, {
-        viewOnceMessage: {
-            message: {
-                messageContextInfo: {
-                    deviceListMetadata: {},
-                    deviceListMetadataVersion: 2
-                },
-                interactiveMessage: proto.Message.InteractiveMessage.create({
-                    body: proto.Message.InteractiveMessage.Body.create({
-                        text: 'Yuk pilih tipe *brat* yang Kamu suka, ada beberapa tipe nih! 😋👇'
-                    }),
-                    footer: proto.Message.InteractiveMessage.Footer.create({
-                        text: footer
-                    }),
-                    nativeFlowMessage: proto.Message.InteractiveMessage.NativeFlowMessage.create({
-                        buttons: [
-                            {
-                                name: "quick_reply",
-                                buttonParamsJson: JSON.stringify({
-                                    display_text: "📸 Gambar",
-                                    id: `${prefix}bratgambar ${text}`
-                                })
-                            },
-                            {
-                                name: "quick_reply",
-                                buttonParamsJson: JSON.stringify({
-                                    display_text: "🎥 Video",
-                                    id: `${prefix}bratvideo ${text}`
-                                })
-                            }
-                        ]
-                    })
-                })
-            }
-        }
-    }, { quoted: m });
+    let caption = 'Yuk pilih tipe *brat* yang Kamu suka, ada beberapa tipe nih! Klik *tombol* di bawah ini ya, kak! 😋👇';
     
-    await sock.relayMessage(msg.key.remoteJid, msg.message, {
-        messageId: msg.key.id
-    });
+    // Gunakan sendButtonText yang sudah ada di main.js
+    sock.sendButtonText(m.chat, [
+        {
+            name: "quick_reply",
+            buttonParamsJson: JSON.stringify({
+                display_text: "📸 Gambar",
+                id: `${prefix}bratgambar ${text}`
+            })
+        },
+        {
+            name: "quick_reply",
+            buttonParamsJson: JSON.stringify({
+                display_text: "🎥 Video",
+                id: `${prefix}bratvideo ${text}`
+            })
+        }
+    ], caption, footer, m);
 }
 break;
 
