@@ -322,7 +322,7 @@ async function checkBandwidth() {
 	};
 };
 
-module.exports = sock = async (sock, m, msg, chatUpdate, store) => {
+module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 	try {
 		const {
 			type,

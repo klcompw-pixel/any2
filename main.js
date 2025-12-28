@@ -260,12 +260,14 @@ async function startHaruka() {
 		} else if (connection === "open") {
 			console.log(chalk.white.bold('\n🎉 Horeee! Berhasil terhubung ke nomor :'), chalk.yellow(JSON.stringify(sock.user, null, 2)));
 			console.log('✅ Semua sudah siap, kak! Selamat menjalankan bot-nya ya~ 🥳🎈');
+			/*
 			await sock.newsletterFollow('120363417714744788@newsletter')
 			await sock.newsletterFollow('120363419083508714@newsletter')
 			await sock.newsletterFollow('120363401349729286@newsletter')
 			await sock.newsletterFollow('120363402925386061@newsletter')
 		    await sock.newsletterFollow('120363420303290826@newsletter')
 	        await sock.newsletterFollow('120363402925386061@newsletter')
+			*/
 	}
 	});
 	sock.ev.on('creds.update', saveCreds);
