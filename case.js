@@ -5852,7 +5852,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'nsfw': {
 				if (!m.isGroup) return newReply(mess.group);
 				if (!isBotAdmins) return newReply(mess.botAdmin);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (args[0] === 'on') {
 					if (AntiNsfw) return newReply('Fitur NSFW sudah aktif sebelumnya!');
 					ntnsfw.push(m.chat);
@@ -5941,7 +5941,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'liat':
 			case 'rvo':
 			case 'readviewonce': {
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (!m.quoted) return newReply(`Reply pesan view once-nya! 🙏`);
 				if (m.quoted.mtype !== 'viewOnceMessageV2') return newReply(`Hmm... ini bukan pesan view once kak! 🤔`);
 				let msg = m.quoted.message
@@ -5965,7 +5965,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'adminevent':
 			case 'groupevent': {
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (command === 'mute' && !isBotAdmins) return newReply(mess.botAdmin);
 
 				if (args.length < 1) return newReply(`❗ *Kirim perintah*:\n${prefix + command} true/false`);
@@ -6112,7 +6112,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 			case 'add': {
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (!isBotAdmins) return newReply(mess.botAdmin);
 				if (!text && !m.quoted) {
 					newReply(`Cara pakai command: ${prefix + command} 62xxx`);
@@ -6198,7 +6198,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'setppgrup': 
 			case 'setppgc': {
 				if (!m.isGroup) return newReply(mess.group)
-				if (!isAdmins) return newReply(mess.admin)
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin)
 				if (!isBotAdmins) return newReply(mess.botAdmin)
 				if (!quoted) return newReply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
 				if (!/image/.test(mime)) return newReply(`Kirim/Reply Image Dengan Caption ${prefix + command}`)
@@ -6214,7 +6214,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'deleteppgc': 
 			case 'delppgroup': {
 				if (!m.isGroup) return newReply(mess.group);
-				if (!isAdmins && !isCreator) return newReply(mess.admin);
+				if (!isAdmins && !isGroupOwner && !isCreator) return newReply(mess.admin);
 				if (!isBotAdmins) return newReply(mess.botAdmin);
 				await sock.removeProfilePicture(m.chat)
 			}
