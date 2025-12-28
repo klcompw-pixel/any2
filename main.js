@@ -71,7 +71,7 @@ const {
 	toNumber 
 } = require('./lib/myfunc');
 
-const makeInMemoryStore = require("baileys").makeInMemoryStore || (() => ({}));
+const store = makeInMemoryStore({
 	logger: pino({
 		level: 'silent'
 	}).child({
