@@ -80,6 +80,17 @@ const store = makeInMemoryStore({
 	})
 });
 */
+// Store dummy karena makeInMemoryStore tidak kompatibel
+const store = {
+	bind: (sock) => {
+		console.log('Store bind dipanggil');
+	},
+	writeToFile: () => {},
+	readFromFile: () => {},
+	contacts: {},
+	chats: {},
+	messages: {}
+};
 global.opts = new Object(yargs(process.argv.slice(2)).exitProcess(false).parse());
 
 global.db = new Low(new JSONFile(`src/${tempatDB}`));

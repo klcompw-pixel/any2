@@ -24,7 +24,7 @@ const {
 	areJidsSameUser,
 	InteractiveMessage,
 	getContentType
-} = require('lily-baileys');
+} = require('baileys');
 const axios = require('axios');
 const cheerio = require('cheerio');
 const chalk = require('chalk');
