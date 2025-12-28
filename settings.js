@@ -13,7 +13,7 @@
 const fs = require('fs');
 const chalk = require('chalk');
 
-global.botName = 'GoodBot'; // Nama Bot Kamu
+global.botName = 'ᴋᴀʏᴀɴᴀ - ᴍᴅ'; // Nama Bot Kamu
 global.ownerNumber = '6285858850541'; // Nomor Kamu
 global.ownerName = 'Felaa'; // Nama Kamu
 global.website = '-'; // Web Kamu
