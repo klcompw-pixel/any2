@@ -6876,25 +6876,16 @@ case 'anomali': {
     if (!text) return newReply(`Contoh : ${prefix + command} Hai kak`);
     if (text.length > 101) return newReply(`Karakter terbatas, max 100!`);
     
-    let caption = 'Yuk pilih tipe *brat* yang Kamu suka, ada beberapa tipe nih! Klik *tombol* di bawah ini ya, kak! 😋👇';
+    let caption = `*Pilih Tipe Brat* 😋
+
+Kamu mau yang mana nih?
+
+📸 Gambar: \`${prefix}bratgambar ${text}\`
+🎥 Video: \`${prefix}bratvideo ${text}\`
+
+Tinggal pilih salah satu ya! ✨`;
     
-    // Gunakan sendButtonText yang sudah ada di main.js
-    sock.sendButtonText(m.chat, [
-        {
-            name: "quick_reply",
-            buttonParamsJson: JSON.stringify({
-                display_text: "📸 Gambar",
-                id: `${prefix}bratgambar ${text}`
-            })
-        },
-        {
-            name: "quick_reply",
-            buttonParamsJson: JSON.stringify({
-                display_text: "🎥 Video",
-                id: `${prefix}bratvideo ${text}`
-            })
-        }
-    ], caption, footer, m);
+    newReply(caption);
 }
 break;
 
