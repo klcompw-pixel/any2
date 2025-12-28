@@ -1,23 +1,23 @@
 
 process.on("uncaughtException", console.error);
 require('./settings');
-const { default: 
-	makeWASocket, 
-	makeCacheableSignalKeyStore, 
-	useMultiFileAuthState, 
-	DisconnectReason, 
-	fetchLatestBaileysVersion, 
-	generateForwardMessageContent, 
-	generateWAMessage, 
-	prepareWAMessageMedia, 
-	generateWAMessageFromContent, 
-	generateMessageID, 
-	downloadContentFromMessage, 
-	makeInMemoryStore, 
-	jidDecode, 
-	proto, 
-	delay 
-} = require("lily-baileys");
+const { 
+    makeWASocket,
+    makeCacheableSignalKeyStore,
+    useMultiFileAuthState,
+    DisconnectReason,
+    fetchLatestBaileysVersion,
+    generateForwardMessageContent,
+    generateWAMessage,
+    prepareWAMessageMedia,
+    generateWAMessageFromContent,
+    generateMessageID,
+    downloadContentFromMessage,
+    makeInMemoryStore,
+    jidDecode,
+    proto,
+    delay
+} = require("baileys");
 const { color } = require('./lib/color');
 const readline = require("readline");
 const NodeCache = require("node-cache");
@@ -182,7 +182,7 @@ async function startHaruka() {
 
 			return message;
 		},
-		version: (await (await fetch('https://raw.githubusercontent.com/WhiskeySockets/Baileys/master/src/Defaults/baileys-version.json')).json()).version,
+		version: (await fetchLatestBaileysVersion()).version,
 		browser: ["Windows", "Chrome", "20.0.04"],
 		logger: pino({ level: 'fatal' }),
 		auth: { 
