@@ -195,10 +195,34 @@ async function startHaruka() {
 	});
 
 	if (!sock.authState.creds.registered) {
-		const phoneNumber = await question('\n\n\nKetik nomor kamu, contoh input nomor yang benar: 6281234567890\n');
-		const code = await sock.requestPairingCode(phoneNumber.trim())
-		console.log(chalk.white.bold(` Kode Pairing Bot Whatsapp kamu :`), chalk.red.bold(`${code}`))
-	}
+    // Tunggu socket benar-benar siap
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    const phoneNumber = await question('\n\n\nKetik nomor kamu, contoh input nomor yang benar: 6281234567890\n');
+    const cleanNumber = phoneNumber.replace(/[^0-9]/g, '').trim();
+    
+    if (!cleanNumber || cleanNumber.length < 10) {
+        console.log(chalk.red.bold('❌ Nomor tidak valid!'));
+        process.exit();
+    }
+    
+    try {
+        // Pastikan usePairingCode = true
+        if (typeof sock.requestPairingCode === 'function') {
+            const code = await sock.requestPairingCode(cleanNumber);
+            if (code) {
+                console.log(chalk.white.bold(` Kode Pairing Bot Whatsapp kamu :`), chalk.red.bold(`${code}`));
+            } else {
+                console.log(chalk.red.bold('❌ Gagal mendapatkan kode pairing. Coba gunakan QR Code saja.'));
+            }
+        } else {
+            console.log(chalk.red.bold('❌ Method requestPairingCode tidak tersedia di versi ini.'));
+            console.log(chalk.yellow.bold('💡 Gunakan QR Code atau update ke @whiskeysockets/baileys official'));
+        }
+    } catch (error) {
+        console.log(chalk.red.bold('❌ Error:'), error.message);
+    }
+}
 
 	sock.ev.on("connection.update", async (update) => {
 		const { connection, lastDisconnect } = update;
