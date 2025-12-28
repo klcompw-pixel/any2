@@ -4838,7 +4838,8 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'blacklistgrub':
 			case 'bgadd': {
 				if (!isCreator) return newReply(mess.owner);
-				const groupId = m.isGroup ? m.chat : text;
+				// allow specifying a target group JID even when command sent from another group
+				const groupId = (text && text.includes('@g.us')) ? text : (m.isGroup ? m.chat : text);
 				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
 				if (groupblacklist.includes(groupId)) return newReply(`Grup ini sudah ada di blacklist! ✅`);
 				groupblacklist.push(groupId);
@@ -4882,7 +4883,8 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			case 'unblacklistgrub':
 			case 'bgdel': {
 				if (!isCreator) return newReply(mess.owner);
-				const groupId = m.isGroup ? m.chat : text;
+				// allow specifying a target group JID even when command sent from another group
+				const groupId = (text && text.includes('@g.us')) ? text : (m.isGroup ? m.chat : text);
 				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
 				const idx = groupblacklist.indexOf(groupId);
 				if (idx === -1) return newReply(`Grup ini tidak ada di blacklist! ❌`);
