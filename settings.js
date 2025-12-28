@@ -38,7 +38,7 @@ global.eggs = '15'; // Eggs Number (Recommended)
 global.nets = '5'; // Nets Number (Recommended)
 global.location = '1'; // Location Number (Recommended)
 
-global.CF_API_KEY = "KGGRRGbLDNT7N-jDi7JUW4hHregvHQvm8o4ORYZ_"; // Apikey CF Kamu
+global.CF_API_KEY = process.env.CF_API_KEY || ""; // Apikey CF Kamu (set via env var)
 global.CF_ZONE_ID = "b9883610d0c1ecf9c83f002897822971"; // Zone ID CF Kamu
 global.CF_DOMAIN = "optikservers.com"; // Nama Domain Kamu di CF
 

@@ -234,6 +234,7 @@ let bad = JSON.parse(fs.readFileSync('./src/data/function/badword.json'));
 let banned = JSON.parse(fs.readFileSync('./src/data/function/banned.json'))
 let blacklist = JSON.parse(fs.readFileSync('./src/data/function/blacklist.json'));
 let whitelist = JSON.parse(fs.readFileSync('./src/data/function/whitelist.json'));
+let groupblacklist = JSON.parse(fs.readFileSync('./src/data/function/groupblacklist.json'));
 let premium = JSON.parse(fs.readFileSync('./src/data/role/premium.json'));
 let owner = JSON.parse(fs.readFileSync('./src/data/role/owner.json'));
 let sewa = JSON.parse(fs.readFileSync('./src/data/role/sewa.json'));
@@ -412,6 +413,7 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 
 		const isSewa = checkSewaGroup(m.chat);
 		const isBlacklist = blacklist.includes(m.sender);
+		const isGroupBlacklist = m.isGroup ? groupblacklist.includes(m.chat) : false;
 		const isWhitelist = whitelist.includes(m.sender);
 		const isAfkOn = checkAfkUser(m.sender, afk)
 		const isUser = userActivity.includes(m.sender);
@@ -2181,6 +2183,11 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 			}
 
 			newReply(pesan);
+		};
+
+		if (isGroupBlacklist && isCmd) {
+			const msg = `*🚫 Grup ini telah didisable*\n\nBot tidak melayani command di grup ini. Silakan hubungi owner untuk informasi lebih lanjut.`;
+			return newReply(msg);
 		};
 
 		const JwbTrue = (tebak, exp, tambahan) => {
@@ -4791,6 +4798,51 @@ module.exports = sock = async (sock, m, msg, chatUpdate, store = null) => {
 					teks += `⭐ ${i + 1}. ${x}\n`;
 				});
 				teks += `\n📊 *Total: ${owner.length}*`;
+				newReply(teks);
+			}
+			break;
+
+			case 'addgroupbl':
+			case 'blacklistgrub':
+			case 'bgadd': {
+				if (!isCreator) return newReply(mess.owner);
+				const groupId = m.isGroup ? m.chat : text;
+				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
+				if (groupblacklist.includes(groupId)) return newReply(`Grup ini sudah ada di blacklist! ✅`);
+				groupblacklist.push(groupId);
+				fs.writeFileSync('./src/data/function/groupblacklist.json', JSON.stringify(groupblacklist, null, 2));
+				newReply(`✅ Grup berhasil ditambahkan ke blacklist!\n\n🔒 Bot akan menonaktifkan command di grup ini.`);
+				logCommand('addgroupbl', m.sender, groupId, 'SUCCESS');
+			}
+			break;
+
+			case 'delgroupbl':
+			case 'unblacklistgrub':
+			case 'bgdel': {
+				if (!isCreator) return newReply(mess.owner);
+				const groupId = m.isGroup ? m.chat : text;
+				if (!groupId) return newReply(`Gunakan ${prefix + command} ID_grup_atau_kirim_di_grup`);
+				const idx = groupblacklist.indexOf(groupId);
+				if (idx === -1) return newReply(`Grup ini tidak ada di blacklist! ❌`);
+				groupblacklist.splice(idx, 1);
+				fs.writeFileSync('./src/data/function/groupblacklist.json', JSON.stringify(groupblacklist, null, 2));
+				newReply(`✅ Grup berhasil dihapus dari blacklist!\n\n🔓 Bot akan mulai melayani command di grup ini.`);
+				logCommand('delgroupbl', m.sender, groupId, 'SUCCESS');
+			}
+			break;
+
+			case 'listgroupbl':
+			case 'listblacklistgrub':
+			case 'blist': {
+				if (!isCreator) return newReply(mess.owner);
+				if (groupblacklist.length === 0) {
+					return newReply(`📋 *List Blacklist Grup:*\n\nTidak ada grup yang di-blacklist. ✅`);
+				}
+				let teks = `📋 *List Blacklist Grup:*\n\n`;
+				groupblacklist.forEach((x, i) => {
+					teks += `🔒 ${i + 1}. ${x}\n`;
+				});
+				teks += `\n📊 *Total: ${groupblacklist.length}*`;
 				newReply(teks);
 			}
 			break;
@@ -8826,7 +8878,8 @@ break;
 				if (!text) return newReply(`🎬 *Judul film atau serialnya mana, Kak?*\n\nContoh:\n${prefix}${command} Inception`);
 				try {
 					await m.react('⏳');
-					let { data } = await axios.get(`http://www.omdbapi.com/?apikey=742b2d09&t=${encodeURIComponent(text)}&plot=full`);
+					const omdbApiKey = process.env.OMDB_API_KEY || '742b2d09';
+					let { data } = await axios.get(`http://www.omdbapi.com/?apikey=${omdbApiKey}&t=${encodeURIComponent(text)}&plot=full`);
 					if (data.Response === 'False') {
 						return newReply(`❌ *Film atau serial tidak ditemukan!* Coba cek lagi judulnya ya, Kak.`);
 					}
@@ -14953,7 +15006,7 @@ ${otherMenu(prefix)}`;
 					m.react('✅');
 					return newReply(bang)
 				}
-				try {
+					if (!isCreator) return m.react('⚠️');
 					newReply(util.format(eval(`(async () => { return ${budy.slice(3)} })()`)))
 				} catch (e) {
 					newReply(String(e))
