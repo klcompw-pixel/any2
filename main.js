@@ -3,10 +3,18 @@ process.on("uncaughtException", console.error);
 require('./settings');
 let _baileysRequire;
 try {
-	_baileysRequire = require('baileys');
-} catch (e) {
-	// fallback to the lily-baileys fork present in package.json
-	_baileysRequire = require('lily-baileys');
+	// prefer the official scoped package if available
+	_baileysRequire = require('@adiwajshing/baileys');
+} catch (e1) {
+	try {
+		_baileysRequire = require('baileys');
+	} catch (e2) {
+		try {
+			_baileysRequire = require('lily-baileys');
+		} catch (e3) {
+			throw new Error("Missing Baileys dependency: install '@adiwajshing/baileys' or 'lily-baileys' (npm install)");
+		}
+	}
 }
 const { 
 	makeWASocket,
