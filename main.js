@@ -1,23 +1,30 @@
 
 process.on("uncaughtException", console.error);
 require('./settings');
+let _baileysRequire;
+try {
+	_baileysRequire = require('baileys');
+} catch (e) {
+	// fallback to the lily-baileys fork present in package.json
+	_baileysRequire = require('lily-baileys');
+}
 const { 
-    makeWASocket,
-    makeCacheableSignalKeyStore,
-    useMultiFileAuthState,
-    DisconnectReason,
-    fetchLatestBaileysVersion,
-    generateForwardMessageContent,
-    generateWAMessage,
-    prepareWAMessageMedia,
-    generateWAMessageFromContent,
-    generateMessageID,
-    downloadContentFromMessage,
-    makeInMemoryStore,
-    jidDecode,
-    proto,
-    delay
-} = require("baileys");
+	makeWASocket,
+	makeCacheableSignalKeyStore,
+	useMultiFileAuthState,
+	DisconnectReason,
+	fetchLatestBaileysVersion,
+	generateForwardMessageContent,
+	generateWAMessage,
+	prepareWAMessageMedia,
+	generateWAMessageFromContent,
+	generateMessageID,
+	downloadContentFromMessage,
+	makeInMemoryStore,
+	jidDecode,
+	proto,
+	delay
+} = _baileysRequire;
 const { color } = require('./lib/color');
 const readline = require("readline");
 const NodeCache = require("node-cache");
